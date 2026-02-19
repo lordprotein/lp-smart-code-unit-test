@@ -331,14 +331,7 @@ ASSERT screen CONTAINS text "Alice"
 - Fast, no network setup required
 - Clear dependency boundary — you control exactly what the service returns
 
-**Alternative: network-level interception** (e.g., MSW) is also acceptable but is more suited for integration tests where you want to exercise the full request chain.
-
-```pseudo
-// Network-level — acceptable but closer to integration style
-INTERCEPT GET "/api/users" RESPOND WITH [{ id: 1, name: "Alice" }]
-RENDER UserList
-WAIT FOR text "Alice" TO APPEAR
-```
+**Alternative**: Network-level interception (e.g., MSW) is also acceptable but closer to integration testing style.
 
 ### Browser APIs
 
@@ -354,12 +347,6 @@ ASSERT app HAS dark theme applied
 MOCK matchMedia("(prefers-color-scheme: dark)") RETURNS { matches: true }
 RENDER App
 ASSERT app RENDERS in dark mode
-
-// IntersectionObserver
-MOCK IntersectionObserver
-RENDER LazyImage
-TRIGGER intersection event
-ASSERT image src IS loaded
 ```
 
 ---
@@ -399,15 +386,7 @@ TEST "renders badge correctly for each status"
 ## UI Testing Antipatterns
 
 ### 1. Testing implementation details
-```pseudo
-// BAD — tests break when you refactor internal state management
-ASSERT component.state.count IS 5
-
-// GOOD — tests survive refactoring
-ASSERT screen CONTAINS text "Count: 5"
-```
-
-**Why it's bad**: Refactoring (changing implementation without changing behavior) should not break tests. If it does, your tests are coupled to implementation.
+See "What NOT to Test" section above — test visible behavior, not internal state, methods, or CSS classes.
 
 ### 2. Testing component tree structure instead of behavior
 ```pseudo
@@ -451,17 +430,7 @@ ASSERT snapshot MATCHES inline: <span class="badge">Active</span>
 **Why it's bad**: Giant snapshots are never reviewed. Developers blindly update them. They provide zero confidence while adding maintenance cost.
 
 ### 5. Asserting on CSS classes instead of behavior
-```pseudo
-// BAD — coupled to CSS implementation
-ASSERT button HAS class "btn-disabled"
-
-// GOOD — tests actual behavior
-ASSERT button "Submit" IS disabled
-CLICK button "Submit"
-ASSERT onSubmit WAS NOT CALLED
-```
-
-**Why it's bad**: CSS classes are implementation details. The class name can change, a different styling approach can be used, and the behavior should still be verified.
+See "CSS classes and inline styles" in "What NOT to Test" above. Test actual disabled/visible/enabled state, not class names.
 
 ### 6. Not waiting for async operations
 ```pseudo
@@ -499,11 +468,9 @@ ASSERT onSave WAS CALLED WITH { date: "2024-01-15" }
 
 | Principle | Description |
 |-----------|-------------|
-| Test behavior, not implementation | Assert on what the user sees and does |
-| Query like a user | Role → Label → Text → test-id |
+| Test behavior, not implementation; query like a user | Assert on what user sees. Role → Label → Text → test-id |
 | Isolate the component | Mock dependencies, test one component's contract |
 | Mock at the boundary | Stub services/children, keep the component under test focused |
-| Keep snapshots small | Focused, meaningful, always reviewed |
-| Wait for async | Never assert on async results synchronously |
+| Keep snapshots small; wait for async | Focused snapshots, always reviewed. Never assert on async results synchronously |
 | Cover all states | Loading, error, empty, success |
 | Test accessibility | Roles, labels, keyboard, focus management |

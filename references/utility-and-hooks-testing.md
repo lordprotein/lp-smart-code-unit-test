@@ -39,77 +39,28 @@ TEST "concatenates strings with separator"
 
 ---
 
-## Parameterized Tests — The Primary Tool for Utilities
+## Parameterized Tests
 
-For utilities, **parameterized (table-driven) tests** should be the default approach. They make it easy to add new cases and clearly show input-output relationships.
-
-```pseudo
-TEST "converts temperature from Celsius to Fahrenheit"
-  TABLE:
-    | celsius | fahrenheit |
-    | 0       | 32         |
-    | 100     | 212        |
-    | -40     | -40        |
-    | 37      | 98.6       |
-
-  FOR EACH row IN TABLE:
-    ASSERT celsiusToFahrenheit(row.celsius) EQUALS row.fahrenheit
-```
+Parameterized (table-driven) tests are the **primary tool for utilities** — see `test-design-patterns.md` for the full pattern. For utilities, use tables to map input-output pairs:
 
 ```pseudo
 TEST "validates email addresses"
   TABLE:
     | input              | valid |
     | "user@example.com" | true  |
-    | "user@sub.domain"  | true  |
     | "user@"            | false |
-    | "@domain.com"      | false |
     | ""                 | false |
     | "no-at-sign"       | false |
-    | "user@.com"        | false |
-    | "user@domain..com" | false |
 
   FOR EACH row IN TABLE:
     ASSERT isValidEmail(row.input) EQUALS row.valid
 ```
 
-**Benefits:**
-- Adding new cases is a single table row
-- Easy to see all test scenarios at a glance
-- Clearly documents the function's contract
-- Covers happy paths, edge cases, and invalid inputs together
-
 ---
 
 ## Boundary Value Analysis
 
-For every utility function, systematically identify **boundaries** — the values where behavior changes.
-
-### Common boundaries to test
-
-| Type | Boundaries |
-|------|-----------|
-| **Strings** | empty `""`, single character, very long, whitespace-only, special characters, unicode, newlines |
-| **Numbers** | 0, negative, MAX_INT, MIN_INT, NaN, Infinity, floating point precision |
-| **Collections** | empty `[]`, single element, large collections, duplicates, nested |
-| **Null/undefined** | null, undefined, missing keys, optional parameters |
-| **Dates** | epoch, leap years, DST transitions, timezone edges, month boundaries |
-| **Boolean** | both true and false, truthy/falsy coercion |
-
-```pseudo
-TEST "truncates string to max length"
-  TABLE:
-    | input          | maxLen | expected       | note              |
-    | ""             | 5      | ""             | empty string      |
-    | "Hi"           | 5      | "Hi"           | shorter than max  |
-    | "Hello"        | 5      | "Hello"        | exactly max       |
-    | "Hello World"  | 5      | "He..."        | longer than max   |
-    | "Hello"        | 0      | "..."          | zero max          |
-    | "Hi"           | 1      | "."            | very small max    |
-
-  FOR EACH row IN TABLE:
-    ASSERT truncate(row.input, row.maxLen) EQUALS row.expected
-```
+Apply boundary analysis from `business-logic-testing.md`. For utilities, pay special attention to: empty strings, `null`/`undefined`, `NaN`/`Infinity`, floating-point precision, unicode/special characters, and truthy/falsy coercion.
 
 ---
 
@@ -129,20 +80,6 @@ TEST "formats currency"
 
   FOR EACH row IN TABLE:
     ASSERT formatCurrency(row.amount, row.currency, row.locale) EQUALS row.expected
-
-TEST "formats relative time"
-  TABLE:
-    | secondsAgo | expected          |
-    | 5          | "just now"        |
-    | 60         | "1 minute ago"    |
-    | 3600       | "1 hour ago"      |
-    | 86400      | "1 day ago"       |
-    | 2592000    | "1 month ago"     |
-
-  FOR EACH row IN TABLE:
-    SET now = FIXED_TIMESTAMP
-    SET past = now - row.secondsAgo
-    ASSERT formatRelativeTime(past, now) EQUALS row.expected
 ```
 
 ### Validators
@@ -244,22 +181,12 @@ TEST "throttle limits execution rate"
 TEST "deep clone produces independent copy"
   SET original = { a: 1, nested: { b: 2 } }
   SET clone = deepClone(original)
-
-  // Verify values match
   ASSERT clone DEEP EQUALS original
-
-  // Verify independence (immutability)
   MUTATE clone.nested.b = 99
   ASSERT original.nested.b EQUALS 2   // original unchanged!
-
-TEST "deep merge combines objects recursively"
-  SET target = { a: 1, nested: { b: 2, c: 3 } }
-  SET source = { nested: { b: 99 }, d: 4 }
-  SET result = deepMerge(target, source)
-
-  ASSERT result DEEP EQUALS { a: 1, nested: { b: 99, c: 3 }, d: 4 }
-  ASSERT target.nested.b EQUALS 2   // target unchanged!
 ```
+
+Key: always verify that mutations to the result don't affect the original (test immutability).
 
 ---
 
@@ -406,21 +333,13 @@ TEST "formatDate formats correctly"
   ASSERT formatDate(someDate) EQUALS "2024-01-15"
   // This tests the date library, not your code!
 
-// GOOD — only test if there's meaningful logic
-FUNCTION formatEventDate(event):
-  IF event.isAllDay:
-    RETURN dateLibrary.format(event.date, "MMM D")
-  ELSE:
-    RETURN dateLibrary.format(event.date, "MMM D, h:mm A")
-
-// This HAS branching logic — worth testing
+// GOOD — only test if there's meaningful logic (branching, conditionals)
+// formatEventDate has if/else for isAllDay → worth testing
 TEST "formatEventDate uses short format for all-day events"
-  SET event = { date: someDate, isAllDay: true }
-  ASSERT formatEventDate(event) EQUALS "Jan 15"
+  ASSERT formatEventDate({ date: someDate, isAllDay: true }) EQUALS "Jan 15"
 
 TEST "formatEventDate includes time for timed events"
-  SET event = { date: someDate, isAllDay: false }
-  ASSERT formatEventDate(event) EQUALS "Jan 15, 2:00 PM"
+  ASSERT formatEventDate({ date: someDate, isAllDay: false }) EQUALS "Jan 15, 2:00 PM"
 ```
 
 ### 2. Don't duplicate function logic in the test
@@ -492,17 +411,6 @@ TEST "filters active users without mutating input"
 
 ---
 
-## Summary
+## Key Principles
 
-| Principle | Description |
-|-----------|-------------|
-| Parameterized tests first | Table-driven tests for input/output functions |
-| Boundary value analysis | Empty, null, zero, max, special characters |
-| Output-based testing | Assert return values, not internal behavior |
-| Test meaningful logic | Skip one-line wrappers and trivial delegation |
-| Don't duplicate logic | Use pre-calculated expected values |
-| Verify immutability | Ensure inputs aren't mutated |
-| Use fake timers | For debounce, throttle, setTimeout |
-| Mock at boundaries | Storage, clipboard, network — not internal modules |
-| Test error paths | Invalid input, wrong types, missing data |
-| Hooks via utilities | Use dedicated hook-testing tools or thin wrappers |
+Parameterized tests first. Boundary analysis at every edge. Output-based assertions. Verify immutability. Mock only at external boundaries. Skip trivial wrappers and standard library tests.

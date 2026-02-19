@@ -219,49 +219,27 @@ test_user_creation():
 
 ---
 
-## The 100% Coverage Trap
+## The 100% Coverage Trap / Testing Trivial Code
 
-**What**: Pursuing 100% code coverage as a goal, leading to useless tests.
+**What**: Pursuing coverage numbers by testing code with zero domain logic.
 
 **Signs**:
 - Tests for getters/setters/constructors
 - Tests that exercise code without meaningful assertions
 - Coverage is high but bugs still slip through
-- Tests are written after-the-fact just for coverage numbers
+
+**What NOT to test**: simple getters/setters, DTOs, one-line delegations, configuration constants, auto-generated code.
+
+**What TO test**: calculated properties with logic, validation rules, custom serialization, constructors with business rules.
 
 ```
 # BAD — testing trivial code for coverage
 def test_user_name_getter():
     user = User(name="John")
     assert user.name == "John"  # Tests the language, not your logic
-
-def test_user_constructor():
-    user = User(name="John", email="j@t.com")
-    assert user.name == "John"
-    assert user.email == "j@t.com"
 ```
 
-**Fix**: Coverage is a metric, not a goal. Aim for high coverage of **domain logic** and **critical paths**. Trivial code doesn't need tests. 80% meaningful coverage > 100% checkbox coverage.
-
----
-
-## Testing Trivial Code
-
-**What**: Writing tests for code with zero domain logic.
-
-**What NOT to test**:
-- Simple getters/setters
-- Data transfer objects (DTOs)
-- One-line delegations
-- Configuration constants
-- Auto-generated code (ORM models, protobuf)
-
-**What TO test**:
-- Calculated properties with logic
-- Validation rules
-- Custom serialization/deserialization
-- Constructors with business rules
-- Anything that could break in a meaningful way
+**Fix**: Coverage is a metric, not a goal. 80% meaningful coverage > 100% checkbox coverage.
 
 ---
 
@@ -345,6 +323,6 @@ def test_new_customer_no_discount():
 | Ice Cream Cone | Mostly E2E, few unit tests | P1 |
 | Fragile Tests | Tests break on refactor | P1 |
 | Second Class Citizen | Copy-paste, magic values, no helpers | P2 |
-| 100% Coverage Trap | Tests for trivial code | P3 |
+| 100% Coverage Trap / Trivial Code | Tests for trivial code | P3 |
 | Shared Mutable State | Tests affect each other | P0 |
 | Conditional Logic | if/for in test body | P2 |

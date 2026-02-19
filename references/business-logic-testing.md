@@ -62,12 +62,14 @@ Test points:
 
 | Type | Boundaries |
 |------|-----------|
-| **Numeric ranges** | min-1, min, min+1, max-1, max, max+1 |
-| **Collections** | empty, one element, typical, at capacity, overflow |
-| **Strings** | empty, single char, typical, max length, max+1 |
-| **Dates** | start of range, end of range, leap year, DST transitions |
+| **Numeric ranges** | min-1, min, min+1, max-1, max, max+1, 0, negative, NaN, Infinity, floating-point precision (0.1+0.2) |
+| **Collections** | empty, one element, typical, at capacity, overflow, duplicates, nested |
+| **Strings** | empty `""`, single char, typical, max length, max+1, whitespace-only, special characters, unicode, newlines |
+| **Dates** | start of range, end of range, leap year, DST transitions, timezone edges, month boundaries, epoch |
 | **Money** | zero, smallest unit (0.01), negative, max amount |
 | **Pagination** | page 0, page 1, last page, beyond last page |
+| **Null/undefined** | null, undefined, missing keys, optional parameters omitted |
+| **Boolean** | both true and false, truthy/falsy coercion (0, "", null vs 1, "0", []) |
 
 ### Boundary test naming
 ```

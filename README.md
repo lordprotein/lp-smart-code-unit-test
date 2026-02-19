@@ -1,17 +1,17 @@
-# LP Smart Code Unit Test
+# Smart Code Test Unit
 
 A comprehensive **unit testing** skill for AI agents. Focused exclusively on unit tests — one unit in isolation, dependencies mocked. Generates ideal tests and reviews existing ones using best practices from Kent Beck, Martin Fowler, Vladimir Khorikov, and Google.
 
 ## Installation
 
 ```bash
-npx skills add lordprotein/lp-smart-code-unit-test
+npx skills add lordprotein/smart-code-test-unit
 ```
 
 Or via Agent Skills:
 
 ```bash
-npx agent-skills-cli install @lordprotein/lp-smart-code-unit-test
+npx agent-skills-cli install @lordprotein/smart-code-test-unit
 ```
 
 ## Features
@@ -32,7 +32,7 @@ npx agent-skills-cli install @lordprotein/lp-smart-code-unit-test
 After installation, run:
 
 ```
-/lp-smart-code-unit-test
+/smart-code-test-unit
 ```
 
 ### Mode 1: Generate Tests
@@ -85,7 +85,7 @@ The skill reviews existing tests for quality issues:
 ## Structure
 
 ```
-lp-smart-code-unit-test/
+smart-code-test-unit/
 ├── SKILL.md                           # Main skill definition
 ├── agents/
 │   └── agent.yaml                     # Agent interface config

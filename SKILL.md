@@ -1,5 +1,5 @@
 ---
-name: lp-smart-code-unit-test
+name: smart-code-test-unit
 description: "Write ideal unit tests and review existing ones. Focused exclusively on unit testing — tests one unit in isolation. Not for integration or E2E tests. Two modes: generate new tests from code analysis, or review existing tests for antipatterns and quality issues. Language-agnostic, based on best practices from Beck, Fowler, Khorikov, and Google."
 ---
 
@@ -169,16 +169,11 @@ This skill is focused **exclusively on unit testing**:
 
 ## Code Classification
 
-> This section is **required**. You MUST classify every analyzed function/method before generating tests.
+> **Required.** Classify every analyzed function/method before generating tests.
 
 | File / Function | Category | Test strategy |
 |----------------|----------|---------------|
-| `order.calculate_total()` | Domain model | Unit test ✓ |
-| `OrderCard` | UI component | UI test ✓ (render, interactions, states) |
-| `formatCurrency()` | Utility / pure function | Output-based test ✓ (parameterized) |
-| `useCart()` | Hook / composable | Hook test ✓ (state, effects) |
-| `OrderDTO` | Trivial | Skip |
-| `OrderController.create()` | Controller | Integration test (not generated) |
+| (list each unit) | Domain model / UI / Utility / Trivial / Controller / Overcomplicated | Unit test / UI test / Output-based / Skip / Integration / Refactor first |
 
 ---
 
@@ -192,12 +187,9 @@ This skill is focused **exclusively on unit testing**:
 
 ## Coverage Notes
 
-- **Tested (business logic)**: [List of business rules covered]
-- **Tested (UI components)**: [List of components tested — rendering, interactions, states, a11y]
-- **Tested (utilities/hooks)**: [List of utilities/hooks tested — input/output, boundaries, side effects]
-- **Not tested (trivial)**: [List of skipped trivial code]
-- **Needs integration test**: [List of controllers/orchestrators]
-- **Needs refactoring first**: [List of overcomplicated code, if any]
+- **Tested**: business rules, UI components, utilities/hooks covered
+- **Not tested (trivial)**: skipped trivial code
+- **Out of scope**: controllers (integration), overcomplicated (refactor first)
 
 ---
 
@@ -244,11 +236,7 @@ This skill is focused **exclusively on unit testing**:
 
 ### 3) Assess severity
 
-Assign severity to each finding:
-- **P0**: False confidence, shared mutable state
-- **P1**: Over-mocking, fragile tests, missing critical coverage, testing implementation details
-- **P2**: Readability issues, slow tests, poor naming, second-class test code
-- **P3**: Trivial test coverage, minor style issues
+Assign severity to each finding using the severity levels defined above (P0-P3).
 
 ### 4) Output format
 
@@ -311,15 +299,4 @@ Please choose an option or provide specific instructions.
 
 ## Resources
 
-### references/
-
-| File | Purpose |
-|------|---------|
-| `testing-principles.md` | Four pillars, FIRST, test pyramid, code classification, behavior vs implementation |
-| `test-design-patterns.md` | AAA, Given-When-Then, builders, parameterization, naming, organization |
-| `test-doubles-guide.md` | Dummy/Stub/Spy/Mock/Fake taxonomy, Classical vs London, decision tree |
-| `business-logic-testing.md` | Decision tables, boundaries, invariants, state machines, error paths |
-| `ui-component-testing.md` | Unit testing UI components: isolation, query priority, UI states, a11y, snapshot rules, UI antipatterns |
-| `utility-and-hooks-testing.md` | Pure functions, parameterized tests, boundary analysis, hooks, side-effect utilities |
-| `antipatterns-checklist.md` | 12 antipatterns with examples, detection signals, and fixes |
-| `test-review-checklist.md` | Structured checklist for reviewing existing tests by severity |
+Reference files are in `references/`. Each step above specifies which files to load.

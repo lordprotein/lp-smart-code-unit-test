@@ -1,13 +1,6 @@
 # Test Review Checklist
 
-## Severity Levels
-
-| Level | Name | Description | Action |
-|-------|------|-------------|--------|
-| **P0** | Critical | Test gives false confidence — passes but doesn't verify correctness | Must fix immediately |
-| **P1** | High | Major quality issue — fragile, over-mocked, or missing critical coverage | Should fix before merge |
-| **P2** | Medium | Maintainability concern — readability, naming, structure | Fix in this PR or follow-up |
-| **P3** | Low | Style or minor suggestion | Optional improvement |
+_Severity levels P0-P3 are defined in SKILL.md._
 
 ---
 
@@ -51,26 +44,7 @@
 
 ## 2. Antipattern Detection
 
-### Critical (P0)
-- [ ] **The Liar**: Tests without meaningful assertions
-- [ ] **Shared Mutable State**: Tests that affect each other's state
-
-### High (P1)
-- [ ] **The Giant**: Tests with multiple Act steps
-- [ ] **The Mockery**: More mock setup than actual test logic
-- [ ] **The Inspector**: Testing private methods/fields directly
-- [ ] **Fragile Tests**: Tests coupled to implementation details
-- [ ] **Ice Cream Cone**: Overreliance on E2E, few unit tests
-
-### Medium (P2)
-- [ ] **The Slow Poke**: Unnecessary delays or real I/O
-- [ ] **Second Class Citizen**: Copy-paste, magic values, no helpers
-- [ ] **Conditional Logic**: if/for/try-catch in test body
-
-### Low (P3)
-- [ ] **100% Coverage Trap**: Tests for trivial code
-- [ ] Minor naming inconsistencies
-- [ ] Excessive comments in straightforward tests
+Apply every check from `antipatterns-checklist.md` (loaded alongside this file). Use the detection table there for severity classification.
 
 ---
 
@@ -143,59 +117,10 @@
 
 ## Review Output Format
 
-```markdown
-## Test Review Summary
-
-**Files reviewed**: X test files, Y test cases
-**Overall assessment**: [APPROVE / REQUEST_CHANGES / COMMENT]
-**Coverage quality**: [Good / Adequate / Insufficient]
+Follow the output format defined in SKILL.md (Mode 2 Step 4).
 
 ---
 
-## Findings
+## Review Sequence
 
-### P0 - Critical
-(none or list)
-
-### P1 - High
-1. **[test_file:line]** Brief title
-   - **Antipattern**: Which antipattern
-   - **Problem**: What's wrong
-   - **Impact**: Why it matters
-   - **Fix**: Suggested correction
-
-### P2 - Medium
-...
-
-### P3 - Low
-...
-
----
-
-## Coverage Gaps
-
-- [List of business rules / paths not covered by any test]
-
-## Positive Observations
-
-- [What's done well — reinforce good practices]
-
-## Suggested Improvements
-
-- [Structural improvements, test helpers, patterns to adopt]
-```
-
----
-
-## Quick-Start Review Sequence
-
-When reviewing tests, follow this order:
-
-1. **Scan for Liars** (P0) — do all tests have meaningful assertions?
-2. **Check isolation** (P0) — any shared mutable state?
-3. **Check doubles usage** (P1) — over-mocking? mocking internals?
-4. **Check fragility** (P1) — do tests verify behavior or implementation?
-5. **Check coverage quality** (P1) — are critical paths tested?
-6. **Check readability** (P2) — names, structure, clarity
-7. **Check speed** (P2) — any unnecessary delays or real I/O?
-8. **Check for trivial tests** (P3) — testing getters/constructors?
+Follow the mandatory 8-step review procedure in SKILL.md (Mode 2 Step 2).
