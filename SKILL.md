@@ -45,6 +45,8 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 
 ### 2) Classify code (Khorikov matrix)
 
+**MANDATORY** — you MUST load and apply the classification matrix. Do NOT skip this step, do NOT generate tests without classifying first.
+
 - Load `references/testing-principles.md` for the classification matrix.
 - Categorize each unit of code:
 
@@ -60,6 +62,8 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 
 ### 3) Determine test scenarios
 
+**MANDATORY** — you MUST load scenario identification techniques before determining scenarios. Do NOT rely on general knowledge alone.
+
 - Load `references/business-logic-testing.md` for scenario identification techniques.
 - For each domain logic unit, identify:
   - **Happy paths**: Core business rules, primary use cases
@@ -71,6 +75,8 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 - Prioritize: business-critical paths first, edge cases second, defensive checks last.
 
 ### 4) Generate tests
+
+**MANDATORY** — you MUST load BOTH reference files below before generating any test code.
 
 - Load `references/test-design-patterns.md` for patterns.
 - Load `references/test-doubles-guide.md` for double selection.
@@ -109,6 +115,8 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 
 ### 5) Self-check against antipatterns
 
+**MANDATORY** — you MUST load the antipatterns checklist and run EVERY check below for EACH generated test. Do NOT output tests without completing this verification.
+
 - Load `references/antipatterns-checklist.md`.
 - Before outputting, verify each generated test against:
   - [ ] Not a Liar — has meaningful assertions
@@ -133,6 +141,8 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 ---
 
 ## Code Classification
+
+> This section is **required**. You MUST classify every analyzed function/method before generating tests.
 
 | File / Function | Category | Test strategy |
 |----------------|----------|---------------|
@@ -166,6 +176,8 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 3. **Create test helpers** — Shall I extract builders/factories for reusable setup?
 ```
 
+**Important**: Do NOT write test files to disk until user explicitly confirms. Present the generated tests in the output first, then ask how to proceed.
+
 ---
 
 ## Mode 2: Review Tests
@@ -182,11 +194,13 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 
 ### 2) Evaluate against checklist
 
+**MANDATORY** — you MUST load ALL THREE reference files below. Do NOT evaluate from memory alone.
+
 - Load `references/test-review-checklist.md` for the full checklist.
 - Load `references/antipatterns-checklist.md` for antipattern detection.
 - Load `references/test-doubles-guide.md` for doubles assessment.
 
-Follow the quick-start review sequence:
+**MANDATORY procedure** — follow this exact sequence for every review. Do NOT skip steps or merge findings:
 1. **Scan for Liars** (P0) — meaningful assertions in every test?
 2. **Check isolation** (P0) — shared mutable state?
 3. **Check doubles usage** (P1) — over-mocking? mocking internals?
