@@ -1,6 +1,6 @@
 # LP Smart Code Unit Test
 
-A comprehensive unit testing skill for AI agents. Generates ideal tests and reviews existing ones using best practices from Kent Beck, Martin Fowler, Vladimir Khorikov, and Google.
+A comprehensive **unit testing** skill for AI agents. Focused exclusively on unit tests — one unit in isolation, dependencies mocked. Generates ideal tests and reviews existing ones using best practices from Kent Beck, Martin Fowler, Vladimir Khorikov, and Google.
 
 ## Installation
 
@@ -20,7 +20,7 @@ npx agent-skills-cli install @lordprotein/lp-smart-code-unit-test
 - **Test Scope Selection** — Choose which types of tests to generate: business logic, UI components, utilities/hooks
 - **Code Classification** — Extended Khorikov matrix: domain model, UI components, utilities/hooks, trivial, controllers, overcomplicated
 - **Business Logic Focus** — Decision tables, boundary analysis, invariants, state machines
-- **UI Component Testing** — Testing Trophy approach, query priority (role > label > text > test-id), states, a11y, snapshot rules
+- **UI Component Testing** — Unit testing individual components in isolation: rendering, interactions, states, a11y, query priority, snapshot rules
 - **Utility & Hooks Testing** — Output-based testing, parameterized tests, boundary value analysis, hooks/composables
 - **Smart Test Doubles** — Classical school by default, mocks only for unmanaged dependencies
 - **Antipattern Detection** — 12 antipatterns with severity levels and fixes
@@ -94,7 +94,7 @@ lp-smart-code-unit-test/
     ├── test-design-patterns.md        # AAA, builders, parameterization, naming
     ├── test-doubles-guide.md          # Dummy/Stub/Spy/Mock/Fake guide
     ├── business-logic-testing.md      # Decision tables, boundaries, invariants
-    ├── ui-component-testing.md        # Testing Trophy, query priority, UI states, a11y, snapshots
+    ├── ui-component-testing.md        # Unit testing UI components, query priority, UI states, a11y, snapshots
     ├── utility-and-hooks-testing.md   # Pure functions, parameterized tests, hooks, boundaries
     ├── antipatterns-checklist.md       # 12 antipatterns with detection and fixes
     └── test-review-checklist.md       # Structured review checklist
@@ -105,7 +105,7 @@ lp-smart-code-unit-test/
 Based on:
 - **Vladimir Khorikov** — Unit Testing: Principles, Practices, and Patterns
 - **Kent Beck** — Test-Driven Development: By Example
-- **Kent C. Dodds** — Testing Trophy, "Testing Implementation Details", component testing philosophy
+- **Kent C. Dodds** — Testing principles, "Testing Implementation Details", query priority, component testing philosophy
 - **Martin Fowler** — Refactoring, TestDouble, TestPyramid
 - **Gerard Meszaros** — xUnit Test Patterns
 - **Google** — Testing Blog, Software Engineering at Google

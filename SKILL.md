@@ -1,6 +1,6 @@
 ---
 name: lp-smart-code-unit-test
-description: "Write ideal unit tests and review existing ones. Two modes: generate new tests from code analysis, or review existing tests for antipatterns and quality issues. Language-agnostic, based on best practices from Beck, Fowler, Khorikov, and Google."
+description: "Write ideal unit tests and review existing ones. Focused exclusively on unit testing — tests one unit in isolation. Not for integration or E2E tests. Two modes: generate new tests from code analysis, or review existing tests for antipatterns and quality issues. Language-agnostic, based on best practices from Beck, Fowler, Khorikov, and Google."
 ---
 
 # Unit Test Expert
@@ -14,6 +14,14 @@ Generate high-quality unit tests or review existing tests using industry best pr
 
 Default to **Generate** mode unless the user explicitly asks to review existing tests or the input is clearly test code.
 
+### Scope
+
+This skill is focused **exclusively on unit testing**:
+- Tests **one unit in isolation** (function, class, component)
+- Dependencies are mocked, stubbed, or faked
+- No E2E tests, no full integration tests spanning multiple real services
+- "Integration" within unit scope is acceptable: e.g., testing a component with its simple presentational children, or a service with an in-memory repository
+
 ## Severity Levels
 
 | Level | Name | Description | Action |
@@ -26,6 +34,21 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 ---
 
 ## Mode 1: Generate Tests
+
+### 0) Determine test scope
+
+**MANDATORY** — you MUST perform this step BEFORE preflight. Do NOT skip it.
+
+- Analyze the target code and determine which categories are present:
+  - **Business logic / domain model** — core rules, algorithms, calculations, state machines
+  - **UI components** — components that render UI, handle user interactions, manage visual state
+  - **Utilities / helpers / hooks** — pure functions, transformers, validators, formatters, parsers, hooks/composables
+- **Ask the user** (multiselect) which types of tests to generate:
+  - Unit tests for business logic
+  - Unit tests for UI components
+  - Unit tests for utilities / hooks
+- If the code clearly belongs to only one category, still confirm with the user before proceeding.
+- Generate only the selected categories — do NOT generate tests for unselected categories.
 
 ### 1) Preflight context
 
@@ -53,6 +76,8 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 | Category | Test strategy |
 |----------|--------------|
 | **Domain model / algorithms** | Unit test extensively — highest priority |
+| **UI component** | Test rendering, interactions, states, a11y (if selected in step 0) |
+| **Utility / pure function / hook** | Output-based testing, parameterized tests (if selected in step 0) |
 | **Trivial code** (getters, DTOs, one-line delegations) | Skip — no tests needed |
 | **Controllers / orchestrators** | Integration tests only — don't unit test |
 | **Overcomplicated code** (high complexity + many dependencies) | Recommend refactoring first, then test |
@@ -76,10 +101,12 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 
 ### 4) Generate tests
 
-**MANDATORY** — you MUST load BOTH reference files below before generating any test code.
+**MANDATORY** — you MUST load the reference files listed below before generating any test code.
 
 - Load `references/test-design-patterns.md` for patterns.
 - Load `references/test-doubles-guide.md` for double selection.
+- **If UI component tests selected** → also load `references/ui-component-testing.md` for UI-specific principles, query priority, snapshot rules, and UI antipatterns.
+- **If utility / hooks tests selected** → also load `references/utility-and-hooks-testing.md` for parameterized testing, boundary analysis, hooks testing strategies, and utility antipatterns.
 - Apply these rules:
 
 **Structure:**
@@ -135,7 +162,7 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 ## Test Generation Summary
 
 **Source**: X files analyzed, Y functions/methods identified
-**Classification**: Domain logic: A, Trivial (skipped): B, Controllers (skip for unit test): C
+**Classification**: Domain logic: A, UI components: B, Utilities/hooks: C, Trivial (skipped): D, Controllers (skip for unit test): E
 **Tests generated**: Z test cases
 
 ---
@@ -147,6 +174,9 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 | File / Function | Category | Test strategy |
 |----------------|----------|---------------|
 | `order.calculate_total()` | Domain model | Unit test ✓ |
+| `OrderCard` | UI component | UI test ✓ (render, interactions, states) |
+| `formatCurrency()` | Utility / pure function | Output-based test ✓ (parameterized) |
+| `useCart()` | Hook / composable | Hook test ✓ (state, effects) |
 | `OrderDTO` | Trivial | Skip |
 | `OrderController.create()` | Controller | Integration test (not generated) |
 
@@ -162,7 +192,9 @@ Default to **Generate** mode unless the user explicitly asks to review existing 
 
 ## Coverage Notes
 
-- **Tested**: [List of business rules covered]
+- **Tested (business logic)**: [List of business rules covered]
+- **Tested (UI components)**: [List of components tested — rendering, interactions, states, a11y]
+- **Tested (utilities/hooks)**: [List of utilities/hooks tested — input/output, boundaries, side effects]
 - **Not tested (trivial)**: [List of skipped trivial code]
 - **Needs integration test**: [List of controllers/orchestrators]
 - **Needs refactoring first**: [List of overcomplicated code, if any]
@@ -287,5 +319,7 @@ Please choose an option or provide specific instructions.
 | `test-design-patterns.md` | AAA, Given-When-Then, builders, parameterization, naming, organization |
 | `test-doubles-guide.md` | Dummy/Stub/Spy/Mock/Fake taxonomy, Classical vs London, decision tree |
 | `business-logic-testing.md` | Decision tables, boundaries, invariants, state machines, error paths |
+| `ui-component-testing.md` | Unit testing UI components: isolation, query priority, UI states, a11y, snapshot rules, UI antipatterns |
+| `utility-and-hooks-testing.md` | Pure functions, parameterized tests, boundary analysis, hooks, side-effect utilities |
 | `antipatterns-checklist.md` | 12 antipatterns with examples, detection signals, and fixes |
 | `test-review-checklist.md` | Structured checklist for reviewing existing tests by severity |
