@@ -120,15 +120,15 @@ class TestCustomers:
 When multiple inputs exercise the same behavior:
 
 ```
-// Instead of 5 separate tests:
-@pytest.mark.parametrize("amount,years,expected_discount", [
-    (100, 0, 0),       # New customer — no discount
-    (100, 1, 5),       # 1 year — 5%
-    (100, 3, 10),      # 3 years — 10%
-    (100, 5, 15),      # 5+ years — 15%
-    (100, 10, 15),     # Cap at 15%
-])
-def test_loyalty_discount(amount, years, expected_discount):
+// Instead of 5 separate tests — parameterized:
+// Each row: [amount, years, expected_discount]
+test_loyalty_discount(amount, years, expected_discount):
+    [100, 0, 0]        // New customer — no discount
+    [100, 1, 5]        // 1 year — 5%
+    [100, 3, 10]       // 3 years — 10%
+    [100, 5, 15]       // 5+ years — 15%
+    [100, 10, 15]      // Cap at 15%
+
     customer = CustomerBuilder().with_loyalty_years(years).build()
     order = Order(amount=amount, customer=customer)
     assert order.discount == expected_discount
@@ -152,13 +152,13 @@ Instead of specific examples, define properties that must always hold:
 
 ```
 // Property: sorting is idempotent
-@given(lists(integers()))
-def test_sort_idempotent(lst):
+// for any random list of integers:
+test_sort_idempotent(lst):
     assert sorted(sorted(lst)) == sorted(lst)
 
 // Property: discount never exceeds item price
-@given(st.floats(min_value=0, max_value=10000))
-def test_discount_never_exceeds_price(price):
+// for any random price in [0, 10000]:
+test_discount_never_exceeds_price(price):
     item = Item(price=price)
     assert item.discounted_price() >= 0
     assert item.discounted_price() <= price

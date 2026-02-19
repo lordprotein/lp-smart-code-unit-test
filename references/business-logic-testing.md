@@ -16,17 +16,17 @@ For complex business rules with multiple conditions, map out all combinations:
 
 Each row becomes a parameterized test case:
 
-```python
-@pytest.mark.parametrize("tier,total,expected_shipping", [
-    ("standard", 30, 9.99),
-    ("standard", 50, 0.00),
-    ("standard", 100, 0.00),
-    ("premium", 20, 4.99),
-    ("premium", 25, 0.00),
-    ("vip", 1, 0.00),
-    ("vip", 1000, 0.00),
-])
-def test_shipping_cost(tier, total, expected_shipping):
+```
+// Parameterized — each row: [tier, total, expected_shipping]
+test_shipping_cost(tier, total, expected_shipping):
+    ["standard", 30, 9.99]
+    ["standard", 50, 0.00]
+    ["standard", 100, 0.00]
+    ["premium", 20, 4.99]
+    ["premium", 25, 0.00]
+    ["vip", 1, 0.00]
+    ["vip", 1000, 0.00]
+
     customer = Customer(tier=tier)
     order = Order(total=total, customer=customer)
     assert order.shipping_cost == expected_shipping
@@ -83,33 +83,30 @@ test_age_validation_rejects_151
 
 Invariants are conditions that must ALWAYS be true:
 
-```python
+```
 class Account:
-    """Invariant: balance can never be negative"""
+    // Invariant: balance can never be negative
 
-    def withdraw(self, amount):
+    withdraw(amount):
         if amount > self.balance:
-            raise InsufficientFundsError()
+            throw InsufficientFundsError
         self.balance -= amount
 
-# Test the invariant holds in all scenarios
-def test_balance_never_negative_after_withdrawal():
+// Test the invariant holds in all scenarios
+test_balance_never_negative_after_withdrawal():
     account = Account(balance=100)
-    with pytest.raises(InsufficientFundsError):
-        account.withdraw(101)
-    assert account.balance == 100  # Unchanged
+    account.withdraw(101)  // → throws InsufficientFundsError
+    assert account.balance == 100  // Unchanged
 
-def test_balance_never_negative_after_concurrent_withdrawals():
+test_balance_never_negative_after_concurrent_withdrawals():
     account = Account(balance=100)
     account.withdraw(60)
-    with pytest.raises(InsufficientFundsError):
-        account.withdraw(60)
+    account.withdraw(60)  // → throws InsufficientFundsError
     assert account.balance == 40
 
-def test_balance_never_negative_on_zero_balance():
+test_balance_never_negative_on_zero_balance():
     account = Account(balance=0)
-    with pytest.raises(InsufficientFundsError):
-        account.withdraw(1)
+    account.withdraw(1)  // → throws InsufficientFundsError
     assert account.balance == 0
 ```
 
@@ -140,7 +137,7 @@ Order States:
 ### What to test
 
 **1. Valid transitions**
-```python
+```
 def test_pending_order_can_be_approved():
     order = Order(status="pending")
     order.approve()
@@ -148,16 +145,15 @@ def test_pending_order_can_be_approved():
 ```
 
 **2. Invalid transitions**
-```python
-def test_shipped_order_cannot_be_cancelled():
+```
+test_shipped_order_cannot_be_cancelled():
     order = Order(status="shipped")
-    with pytest.raises(InvalidTransitionError):
-        order.cancel()
-    assert order.status == "shipped"  # State unchanged
+    order.cancel()  // → throws InvalidTransitionError
+    assert order.status == "shipped"  // State unchanged
 ```
 
 **3. Side effects of transitions**
-```python
+```
 def test_shipping_decrements_inventory():
     order = Order(status="confirmed", items=[Item(sku="A", qty=2)])
     order.ship(inventory)
@@ -165,11 +161,10 @@ def test_shipping_decrements_inventory():
 ```
 
 **4. Guards / preconditions**
-```python
-def test_cannot_confirm_order_without_payment():
+```
+test_cannot_confirm_order_without_payment():
     order = Order(status="pending", payment=None)
-    with pytest.raises(PreconditionError):
-        order.approve()
+    order.approve()  // → throws PreconditionError
 ```
 
 ---
@@ -178,16 +173,15 @@ def test_cannot_confirm_order_without_payment():
 
 ### Test the system state AFTER an error
 
-```python
-# Not just "it throws" — verify state is consistent after failure
-def test_failed_transfer_preserves_balances():
+```
+// Not just "it throws" — verify state is consistent after failure
+test_failed_transfer_preserves_balances():
     source = Account(balance=100)
     target = Account(balance=50)
 
-    with pytest.raises(InsufficientFundsError):
-        transfer(source, target, amount=200)
+    transfer(source, target, amount=200)  // → throws InsufficientFundsError
 
-    # Both accounts unchanged — no partial mutation
+    // Both accounts unchanged — no partial mutation
     assert source.balance == 100
     assert target.balance == 50
 ```
@@ -225,19 +219,19 @@ Partitions:
 ```
 
 **One test per partition** + **boundary values between partitions**:
-```python
-@pytest.mark.parametrize("age,expected_category", [
-    (-1, "invalid"),    # Invalid partition
-    (6, "child"),       # Child partition
-    (12, "child"),      # Child-Teen boundary
-    (13, "teen"),       # Teen partition start
-    (17, "teen"),       # Teen-Adult boundary
-    (18, "adult"),      # Adult partition start
-    (64, "adult"),      # Adult-Senior boundary
-    (65, "senior"),     # Senior partition start
-    (70, "senior"),     # Senior partition
-])
-def test_age_category(age, expected_category):
+```
+// Parameterized — each row: [age, expected_category]
+test_age_category(age, expected_category):
+    [-1, "invalid"]     // Invalid partition
+    [6, "child"]        // Child partition
+    [12, "child"]       // Child-Teen boundary
+    [13, "teen"]        // Teen partition start
+    [17, "teen"]        // Teen-Adult boundary
+    [18, "adult"]       // Adult partition start
+    [64, "adult"]       // Adult-Senior boundary
+    [65, "senior"]      // Senior partition start
+    [70, "senior"]      // Senior partition
+
     assert categorize_age(age) == expected_category
 ```
 
@@ -248,7 +242,7 @@ def test_age_category(age, expected_category):
 ### Patterns to test
 
 **1. Race conditions in business logic**
-```python
+```
 def test_double_booking_prevented():
     """Two simultaneous bookings for the same slot — only one succeeds"""
     slot = TimeSlot(capacity=1)
@@ -264,7 +258,7 @@ def test_double_booking_prevented():
 ```
 
 **2. Idempotency**
-```python
+```
 def test_payment_processing_is_idempotent():
     """Same payment request processed twice has same result"""
     request = PaymentRequest(id="req_123", amount=100)
@@ -277,7 +271,7 @@ def test_payment_processing_is_idempotent():
 ```
 
 **3. Ordering guarantees**
-```python
+```
 def test_events_processed_in_order():
     """Later events don't overwrite earlier state"""
     processor = EventProcessor()

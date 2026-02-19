@@ -10,7 +10,7 @@
 - Asserts on a mock's return value (you set it up yourself!)
 - Asserts on always-true conditions
 
-```python
+```
 # BAD — The Liar: no real assertion
 def test_process_order():
     order = Order(items=[Item(price=10)])
@@ -39,7 +39,7 @@ def test_process_order_calculates_total():
 - 10+ assertions checking unrelated things
 - Failures are hard to diagnose
 
-```python
+```
 # BAD — The Giant
 def test_order_system():
     # 30 lines of setup...
@@ -72,22 +72,22 @@ def test_order_system():
 - Deeply chained mock returns
 - Test passes regardless of actual implementation
 
-```python
-# BAD — The Mockery
-def test_order_service():
-    mock_repo = Mock()
-    mock_validator = Mock()
-    mock_calculator = Mock()
-    mock_notifier = Mock()
-    mock_repo.find.return_value = Mock(status="pending")
-    mock_calculator.calculate.return_value = 100
-    mock_validator.validate.return_value = True
+```
+// BAD — The Mockery
+test_order_service():
+    mock_repo = mock(OrderRepository)
+    mock_validator = mock(Validator)
+    mock_calculator = mock(Calculator)
+    mock_notifier = mock(Notifier)
+    mock_repo.find.returns(stub(status="pending"))
+    mock_calculator.calculate.returns(100)
+    mock_validator.validate.returns(true)
 
     service = OrderService(mock_repo, mock_validator, mock_calculator, mock_notifier)
     service.process(order_id=1)
 
-    mock_calculator.calculate.assert_called_once()  # So what?
-    mock_notifier.notify.assert_called_once()        # Coupled to implementation
+    verify(mock_calculator.calculate).called_once()  // So what?
+    verify(mock_notifier.notify).called_once()        // Coupled to implementation
 ```
 
 **Fix**: Use real objects for in-process dependencies. Mock only unmanaged out-of-process dependencies. If you need many mocks, the class has too many dependencies — refactor it.
@@ -104,7 +104,7 @@ def test_order_service():
 - Using reflection to bypass access control
 - Test name references internal methods
 
-```python
+```
 # BAD — testing implementation detail
 def test_internal_cache_populated():
     service = UserService()
@@ -134,20 +134,19 @@ def test_second_call_returns_same_user():
 - File system I/O in unit tests
 - Spinning up containers in unit test suite
 
-```python
-# BAD — The Slow Poke
-def test_retry_logic():
-    service = Service(retry_delay=5)  # Real 5-second delay
-    with pytest.raises(TimeoutError):
-        service.call_external_api()
-    # Test takes 15+ seconds (3 retries × 5 seconds)
+```
+// BAD — The Slow Poke
+test_retry_logic():
+    service = Service(retry_delay=5)  // Real 5-second delay
+    service.call_external_api()       // → throws TimeoutError
+    // Test takes 15+ seconds (3 retries × 5 seconds)
 
-# GOOD — inject time control
-def test_retry_logic():
+// GOOD — inject time control
+test_retry_logic():
     clock = FakeClock()
     service = Service(retry_delay=5, clock=clock)
     service.call_external_api()
-    assert clock.advanced_by == 15  # Verified timing without waiting
+    assert clock.advanced_by == 15  // Verified timing without waiting
 ```
 
 **Fix**: Inject clocks, use fakes for I/O, keep unit tests under 100ms each.
@@ -179,25 +178,25 @@ def test_retry_logic():
 - Mocking internal collaborators
 - Tests break when you rename a private method
 
-```python
-# BAD — Fragile: coupled to implementation
-def test_user_creation():
-    mock_repo = Mock()
+```
+// BAD — Fragile: coupled to implementation
+test_user_creation():
+    mock_repo = mock(UserRepository)
     service = UserService(mock_repo)
     service.create_user("john@test.com")
 
-    # These break if you refactor internal flow
-    mock_repo.check_exists.assert_called_once_with("john@test.com")
-    mock_repo.save.assert_called_once()
-    mock_repo.save.assert_called_with(ANY)
+    // These break if you refactor internal flow
+    verify(mock_repo.check_exists).called_once_with("john@test.com")
+    verify(mock_repo.save).called_once()
+    verify(mock_repo.save).called_with(ANY)
 
-# GOOD — test behavior, not implementation
-def test_user_creation():
+// GOOD — test behavior, not implementation
+test_user_creation():
     repo = InMemoryUserRepo()
     service = UserService(repo)
     service.create_user("john@test.com")
 
-    assert repo.find_by_email("john@test.com") is not None
+    assert repo.find_by_email("john@test.com") is not null
 ```
 
 **Fix**: Test observable outcomes (return values, state changes, external communications), not internal call sequences.
@@ -230,7 +229,7 @@ def test_user_creation():
 - Coverage is high but bugs still slip through
 - Tests are written after-the-fact just for coverage numbers
 
-```python
+```
 # BAD — testing trivial code for coverage
 def test_user_name_getter():
     user = User(name="John")
@@ -276,7 +275,7 @@ def test_user_constructor():
 - Class-level or module-level variables mutated in tests
 - Global singletons modified without reset
 
-```python
+```
 # BAD — shared state
 class TestOrderService:
     orders = []  # Shared between all tests!
@@ -303,7 +302,7 @@ class TestOrderService:
 - Try/catch hiding failures
 - Complex helper logic in the test itself
 
-```python
+```
 # BAD — conditional logic in test
 def test_discounts():
     for customer in get_all_customers():

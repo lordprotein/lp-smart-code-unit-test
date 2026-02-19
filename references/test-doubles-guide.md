@@ -94,14 +94,14 @@ Google Testing Blog advocates **fakes** over mocks because:
 ```
 // Mock approach — verifies interaction, not behavior
 test("create user sends welcome email"):
-    mock_email = Mock()
+    mock_email = mock(EmailService)
     service = UserService(email_service=mock_email)
     service.create_user("john@test.com")
-    mock_email.send.assert_called_once_with("john@test.com", "Welcome!")
+    verify(mock_email.send).called_once_with("john@test.com", "Welcome!")
 
 // Fake approach — verifies behavior through real (simplified) implementation
 test("create user sends welcome email"):
-    fake_email = FakeEmailService()  # In-memory, stores sent emails
+    fake_email = FakeEmailService()  // In-memory, stores sent emails
     service = UserService(email_service=fake_email)
     service.create_user("john@test.com")
     assert fake_email.sent_emails == [Email(to="john@test.com", subject="Welcome!")]
@@ -119,21 +119,21 @@ Coined by Steve Freeman and Nat Pryce (Growing Object-Oriented Software, Guided 
 
 ```
 // BAD — mocking library you don't own
-@patch("stripe.PaymentIntent.create")
-def test_payment(mock_stripe):
-    mock_stripe.return_value = {"id": "pi_123", "status": "succeeded"}
+test_payment():
+    mock(PaymentLibrary.create)    // Directly patching 3rd-party API
+    mock.returns({"id": "pi_123", "status": "succeeded"})
     ...
 
 // GOOD — mock your own interface
-class PaymentGateway(Protocol):
-    def charge(self, amount: Money, card: Card) -> PaymentResult: ...
+interface PaymentGateway:
+    charge(amount: Money, card: Card) -> PaymentResult
 
-class StripeGateway(PaymentGateway):  # Real implementation
-    def charge(self, amount, card):
-        return stripe.PaymentIntent.create(...)
+class StripeGateway implements PaymentGateway:  // Real implementation
+    charge(amount, card):
+        return stripe_library.create(...)
 
-class FakePaymentGateway(PaymentGateway):  # Test double
-    def charge(self, amount, card):
+class FakePaymentGateway implements PaymentGateway:  // Test double
+    charge(amount, card):
         return PaymentResult(id="fake_123", status="succeeded")
 ```
 
@@ -164,51 +164,3 @@ class FakePaymentGateway(PaymentGateway):  # Test double
 
 ---
 
-## Common Patterns by Language
-
-### JavaScript/TypeScript
-```javascript
-// Jest manual mock
-jest.mock('./emailService', () => ({
-  send: jest.fn().mockResolvedValue({ success: true })
-}))
-
-// Dependency injection for testability
-const service = new OrderService({ emailService: fakeEmailService })
-```
-
-### Python
-```python
-# pytest fixtures + fakes
-@pytest.fixture
-def email_service():
-    return FakeEmailService()
-
-def test_order(email_service):
-    service = OrderService(email_service=email_service)
-```
-
-### Java/Kotlin
-```java
-// Mockito — stub
-when(repository.findById(1L)).thenReturn(Optional.of(user));
-
-// Mockito — verify (use sparingly)
-verify(emailService).send(argThat(email -> email.getTo().equals("user@test.com")));
-```
-
-### Go
-```go
-// Interface-based fakes (idiomatic Go)
-type FakeStore struct {
-    users map[string]User
-}
-
-func (f *FakeStore) GetUser(id string) (User, error) {
-    u, ok := f.users[id]
-    if !ok {
-        return User{}, ErrNotFound
-    }
-    return u, nil
-}
-```
