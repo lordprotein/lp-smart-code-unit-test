@@ -134,6 +134,11 @@ This skill is focused **exclusively on unit testing**:
 - Use parameterized tests for decision tables and boundary value sets
 - Every magic value in a test should have a clear purpose (via variable name or context)
 
+**Typing (TypeScript / typed languages):**
+- Always use real types from the project — import and reuse existing interfaces, types, enums
+- If the real type is not found — use `unknown`, never `any`
+- `any` is forbidden unless there is absolutely no other option
+
 **Assertions:**
 - Assert on specific expected values, not just `is not None` or `doesn't throw`
 - For error paths, assert on system state AFTER the error (not just the exception)
